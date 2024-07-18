@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Data to Google Sheets</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            /* background-image: url(development.jpg); */
+            background-size: cover;
+            background-repeat: no-repeat; 
+      
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            color: chocolate;
+            font-weight: bolder;
+
+        }
+        .form-group {
+            margin-bottom: 15px;
+     
+        }
+
+        .button{
+            background: -webkit-linear-gradient(rgb(40, 130, 40),rgb(108, 192, 108));
+           
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center">विकासकामे</h2>
+        <form id="addForm">
+            <div class="form-group">
+                <label for="year">सन</label>
+                <input type="text" class="form-control" id="year" required>
+            </div>
+            <div class="form-group">
+                <label for="work">नाव</label>
+                <input type="text" class="form-control" id="work" required>
+            </div>
+            <div class="form-group">
+                <label for="Scheme">योजना:</label>
+                <input type="text" class="form-control" id="Scheme" required>
+            </div>
+            <div class="form-group">
+                <label for="amt">निधी:</label>
+                <input type="text" class="form-control" id="amt" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block button">Save</button>
+        </form>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz62YSHr1vJ0TO-fMtZTIUB_QJSjN5HKcwFr2f3v5TfH9CmJI1tyyvrj4mz1mv3y3zD/exec';
+
+        $(document).ready(function() {
+            $('#addForm').submit(function(e) {
+                e.preventDefault();
+                const year = $('#year').val();
+                const work = $('#work').val();
+                const Scheme = $('#Scheme').val();
+                const amt = $('#amt').val();
+
+                fetch(scriptURL + `?action=addData&wardno=${year}&date=${work}&time=${Scheme}&day=${amt}`, { method: 'POST' })
+                    .then(response => response.text())
+                    .then(data => {
+                        alert('Data saved successfully.');
+                        window.location.href = 'show.html'; // Replace 'nextpage.html' with your desired URL
+                    })
+                    .catch(error => console.error('Error saving data:', error));
+            });
+        });
+
+        function resetForm() {
+            $('#year').val('');
+            $('#work').val('');
+            $('#Scheme').val('');
+            $('#amt').val('');
+        }
+    </script>
+</body>
+</html>

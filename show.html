@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show Ward Data from Google Sheets</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .card {
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+        }
+        .card-body {
+            background-color: #ffffff;
+            border-radius: 0.375rem;
+            padding: 1.25rem;
+        }
+        .card-title {
+            color: #007bff;
+        }
+        .card-text {
+            color: #6c757d;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .loading-message {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="text-center mb-4">विकासकामे</h2>
+        <div class="d-flex justify-content-center">
+            <button id="showSchmContainer" class="btn btn-primary mb-3">सर्व योजना दाखवा</button>
+        </div>
+        <div id="loadingMessage" class="loading-message">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <div>Please wait until all information is shown...</div>
+        </div>
+        <div id="schmDataContainer" class="row">
+            <!-- Cards will be dynamically added here -->
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbz62YSHr1vJ0TO-fMtZTIUB_QJSjN5HKcwFr2f3v5TfH9CmJI1tyyvrj4mz1mv3y3zD/exec';
+
+        $(document).ready(function() {
+            $('#showSchmContainer').click(function() {
+                $(this).hide(); // Hide the button
+                $('#loadingMessage').show(); // Show the loading message
+
+                fetch(scriptURL + '?action=getWardNumbers')
+                    .then(response => response.json())
+                    .then(data => {
+                        $('#schmDataContainer').empty(); // Clear previous cards
+                        let promises = data.map(year => 
+                            fetch(scriptURL + `?action=getData&wardno=${year}`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.length > 0) {
+                                        const rowData = data[0]; // Assuming only one row for simplicity
+                                        const formattedDate = new Date(rowData[1]).toLocaleDateString();
+                                        const formattedTime = new Date(rowData[2]).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                                        const cardHtml = `
+                                            <div class="col-md-6">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <h5 class="card-title">Year: ${rowData[0]}</h5>
+                                                        <p class="card-text">Work: ${rowData[1]}</p>
+                                                        <p class="card-text">Scheme: ${rowData[2]}</p>
+                                                        <p class="card-text">NIdhi: ${rowData[3]}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                        $('#schmDataContainer').append(cardHtml);
+                                    }
+                                })
+                        );
+                        
+                        Promise.all(promises).then(() => {
+                            $('#loadingMessage').hide(); // Hide the loading message after all data is fetched
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching ward numbers:', error);
+                        $('#loadingMessage').hide(); // Hide the loading message in case of error
+                    });
+            });
+        });
+    </script>
+</body>
+</html>
