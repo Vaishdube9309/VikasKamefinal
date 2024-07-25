@@ -38,30 +38,14 @@
             background-color: #0056b3;
             border-color: #004085;
         }
-        .loading-message {
-            display: none;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #007bff;
-        }
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="text-center mb-4">विकासकामे</h2>
+    <div class="container ">
+        <h2 class=" text-center mb-4 ">Vikaskame</h2>
         <div class="d-flex justify-content-center">
-            <button id="showSchmContainer" class="btn btn-primary mb-3">सर्व योजना दाखवा</button>
-        </div>
-        <div id="loadingMessage" class="loading-message">
-            <div class="spinner-border text-primary" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-            <div>Please wait until all information is shown...</div>
-        </div>
+        <button id="showSchmContainer" class="btn  btn-primary mb-3">Show All Schemes</button>
+    </div>
         <div id="schmDataContainer" class="row">
             <!-- Cards will be dynamically added here -->
         </div>
@@ -74,19 +58,15 @@
 
         $(document).ready(function() {
             $('#showSchmContainer').click(function() {
-                $(this).hide(); // Hide the button
-                $('#loadingMessage').show(); // Show the loading message
-
                 fetch(scriptURL + '?action=getWardNumbers')
                     .then(response => response.json())
                     .then(data => {
                         $('#schmDataContainer').empty(); // Clear previous cards
-                        let promises = data.map(year => 
-                            fetch(scriptURL + `?action=getData&wardno=${year}`)
+                        data.forEach(wardno => {
+                            fetch(scriptURL + ?action=getData&wardno=${wardno})
                                 .then(response => response.json())
                                 .then(data => {
-                                    if (data.length > 0) {
-                                        const rowData = data[0]; // Assuming only one row for simplicity
+                                    data.forEach(rowData => {
                                         const formattedDate = new Date(rowData[1]).toLocaleDateString();
                                         const formattedTime = new Date(rowData[2]).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
                                         const cardHtml = `
@@ -102,18 +82,12 @@
                                             </div>
                                         `;
                                         $('#schmDataContainer').append(cardHtml);
-                                    }
+                                    });
                                 })
-                        );
-                        
-                        Promise.all(promises).then(() => {
-                            $('#loadingMessage').hide(); // Hide the loading message after all data is fetched
+                                .catch(error => console.error('Error fetching data:', error));
                         });
                     })
-                    .catch(error => {
-                        console.error('Error fetching ward numbers:', error);
-                        $('#loadingMessage').hide(); // Hide the loading message in case of error
-                    });
+                    .catch(error => console.error('Error fetching ward numbers:', error));
             });
         });
     </script>
